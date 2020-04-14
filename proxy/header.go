@@ -11,6 +11,8 @@ import (
 
 var protocolSignature = [12]byte{0x0D, 0x0A, 0x0D, 0x0A, 0x00, 0x0D, 0x0A, 0x51, 0x55, 0x49, 0x54, 0x0A}
 
+const protocolVersion = 2
+
 const (
 	commandLocal = 0x00
 	commandProxy = 0x01
@@ -37,13 +39,17 @@ func ReadHeader(conn net.Conn) (*Header, error) {
 
 	var (
 		signature = preamble[0:12]
-		command   = preamble[12]
+		version   = preamble[12] >> 4
+		command   = preamble[12] & 0xF
 		family    = preamble[13]
 		length    = binary.BigEndian.Uint16(preamble[14:16])
 	)
 
 	if !bytes.Equal(signature[:], protocolSignature[:]) {
 		return nil, errors.New("Not a proxied connection")
+	}
+	if version != protocolVersion {
+		return nil, errors.New("Unsupported proxy protocol version")
 	}
 
 	payload := make([]byte, length)
@@ -148,7 +154,7 @@ func (header Header) Format() []byte {
 func formatIPv4Header(family uint8, remoteIP, localIP net.IP, remotePort, localPort int) []byte {
 	header := make([]byte, 28)
 	copy(header[0:12], protocolSignature[:])
-	header[12] = commandProxy
+	header[12] = (protocolVersion << 4) | commandProxy
 	header[13] = family
 	binary.BigEndian.PutUint16(header[14:16], 12)
 	copy(header[16:20], remoteIP.To4())
@@ -161,7 +167,7 @@ func formatIPv4Header(family uint8, remoteIP, localIP net.IP, remotePort, localP
 func formatIPv6Header(family uint8, remoteIP, localIP net.IP, remotePort, localPort int) []byte {
 	header := make([]byte, 52)
 	copy(header[0:12], protocolSignature[:])
-	header[12] = commandProxy
+	header[12] = (protocolVersion << 4) | commandProxy
 	header[13] = family
 	binary.BigEndian.PutUint16(header[14:16], 36)
 	copy(header[16:32], remoteIP)
@@ -174,7 +180,7 @@ func formatIPv6Header(family uint8, remoteIP, localIP net.IP, remotePort, localP
 func formatUnspecifiedHeader() []byte {
 	var header [16]byte
 	copy(header[0:12], protocolSignature[:])
-	header[12] = commandProxy
+	header[12] = (protocolVersion << 4) | commandProxy
 	header[13] = familyUnspecified
 	return header[:]
 }
