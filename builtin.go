@@ -1,4 +1,4 @@
-package listeners // import "src.agwa.name/go-listeners"
+package listener // import "src.agwa.name/go-listener"
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"src.agwa.name/go-listeners/proxy"
+	"src.agwa.name/go-listener/proxy"
 )
 
 func init() {
@@ -97,9 +97,9 @@ func openProxyListener(params map[string]interface{}, arg string) (net.Listener,
 	var inner net.Listener
 	var err error
 	if arg != "" {
-		inner, err = OpenFromSpec(arg)
+		inner, err = Open(arg)
 	} else if spec, ok := params["listener"].(map[string]interface{}); ok {
-		inner, err = OpenFromJSON(spec)
+		inner, err = OpenJSON(spec)
 	} else {
 		return nil, errors.New("inner socket not specified for proxy listener")
 	}

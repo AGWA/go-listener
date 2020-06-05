@@ -1,4 +1,4 @@
-package listeners // import "src.agwa.name/go-listeners"
+package listener // import "src.agwa.name/go-listener"
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Open(listenerType string, params map[string]interface{}, argument string) (net.Listener, error) {
+func OpenType(listenerType string, params map[string]interface{}, argument string) (net.Listener, error) {
 	openListener := getOpenListenerFunc(listenerType)
 	if openListener == nil {
 		return nil, fmt.Errorf("Unknown listener type: " + listenerType)
@@ -15,20 +15,20 @@ func Open(listenerType string, params map[string]interface{}, argument string) (
 	return openListener(params, argument)
 }
 
-func OpenFromSpec(spec string) (net.Listener, error) {
+func Open(spec string) (net.Listener, error) {
 	if strings.Contains(spec, ":") {
 		fields := strings.SplitN(spec, ":", 2)
 		listenerType, arg := fields[0], fields[1]
-		return Open(listenerType, nil, arg)
+		return OpenType(listenerType, nil, arg)
 	} else {
 		return openTCPListener(nil, spec)
 	}
 }
 
-func OpenFromSpecs(specs string) ([]net.Listener, error) {
+func OpenAll(specs []string) ([]net.Listener, error) {
 	listeners := []net.Listener{}
-	for _, spec := range strings.Split(specs, ",") {
-		listener, err := OpenFromSpec(spec)
+	for _, spec := range specs {
+		listener, err := Open(spec)
 		if err != nil {
 			CloseAll(listeners)
 			return nil, fmt.Errorf("%s: %w", spec, err)
@@ -38,10 +38,10 @@ func OpenFromSpecs(specs string) ([]net.Listener, error) {
 	return listeners, nil
 }
 
-func OpenFromJSON(spec map[string]interface{}) (net.Listener, error) {
+func OpenJSON(spec map[string]interface{}) (net.Listener, error) {
 	listenerType, ok := spec["type"].(string)
 	if !ok {
 		return nil, errors.New("Listener object does not contain a string type field")
 	}
-	return Open(listenerType, spec, "")
+	return OpenType(listenerType, spec, "")
 }

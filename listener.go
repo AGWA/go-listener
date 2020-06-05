@@ -1,4 +1,4 @@
-package listeners // import "src.agwa.name/go-listeners"
+package listener // import "src.agwa.name/go-listener"
 
 import (
 	"net"
