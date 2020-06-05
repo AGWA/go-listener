@@ -4,13 +4,7 @@ import (
 	"net"
 )
 
-func CloseTCP(listeners []*net.TCPListener) {
-	for _, listener := range listeners {
-		listener.Close()
-	}
-}
-
-func CloseUDP(listeners []*net.UDPConn) {
+func CloseListeners(listeners []net.Listener) {
 	for _, listener := range listeners {
 		listener.Close()
 	}

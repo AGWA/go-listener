@@ -1,113 +1,47 @@
 package listeners // import "src.agwa.name/go-listeners"
 
 import (
+	"errors"
 	"fmt"
 	"net"
-	"os"
-	"strconv"
 	"strings"
 )
 
-func openTCPListenerForAddress(addressString string) (*net.TCPListener, error) {
-	address, err := net.ResolveTCPAddr("tcp", addressString)
-	if err != nil {
-		return nil, err
+func OpenListener(listenerType string, params map[string]interface{}, argument string) (net.Listener, error) {
+	openListener := getOpenListenerFunc(listenerType)
+	if openListener == nil {
+		return nil, fmt.Errorf("Unknown listener type: " + listenerType)
 	}
-	return net.ListenTCP("tcp", address)
+	return openListener(params, argument)
 }
 
-func openUDPListenerForAddress(addressString string) (*net.UDPConn, error) {
-	address, err := net.ResolveUDPAddr("udp", addressString)
-	if err != nil {
-		return nil, err
+func OpenListenerFromSpec(spec string) (net.Listener, error) {
+	if strings.Contains(spec, ":") {
+		fields := strings.SplitN(spec, ":", 2)
+		listenerType, arg := fields[0], fields[1]
+		return OpenListener(listenerType, nil, arg)
+	} else {
+		return openTCPListener(nil, spec)
 	}
-	return net.ListenUDP("udp", address)
 }
 
-func openTCPListenerForFileDesc(fdString string) (*net.TCPListener, error) {
-	fd, err := strconv.ParseUint(fdString, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("'%s' is a malformed file descriptor", fdString)
-	}
-	file := os.NewFile(uintptr(fd), fdString)
-	fileListener, err := net.FileListener(file)
-	file.Close()
-	if err != nil {
-		return nil, err
-	}
-	listener, isTCP := fileListener.(*net.TCPListener)
-	if !isTCP {
-		fileListener.Close()
-		return nil, fmt.Errorf("%s is not a TCP listener", fdString)
-	}
-	return listener, nil
-}
-
-func openUDPListenerForFileDesc(fdString string) (*net.UDPConn, error) {
-	fd, err := strconv.ParseUint(fdString, 10, 64)
-	if err != nil {
-		return nil, fmt.Errorf("'%s' is a malformed file descriptor", fdString)
-	}
-	file := os.NewFile(uintptr(fd), fdString)
-	fileListener, err := net.FilePacketConn(file)
-	file.Close()
-	if err != nil {
-		return nil, err
-	}
-	listener, isUDP := fileListener.(*net.UDPConn)
-	if !isUDP {
-		fileListener.Close()
-		return nil, fmt.Errorf("%s is not a UDP listener", fdString)
-	}
-	return listener, nil
-}
-
-func OpenTCP(addresses string, filedescs string) ([]*net.TCPListener, error) {
-	listeners := []*net.TCPListener{}
-	if addresses != "" {
-		for _, addressString := range strings.Split(addresses, ",") {
-			listener, err := openTCPListenerForAddress(addressString)
-			if err != nil {
-				CloseTCP(listeners)
-				return nil, err
-			}
-			listeners = append(listeners, listener)
+func OpenListenersFromSpecs(specs string) ([]net.Listener, error) {
+	listeners := []net.Listener{}
+	for _, spec := range strings.Split(specs, ",") {
+		listener, err := OpenListenerFromSpec(spec)
+		if err != nil {
+			CloseListeners(listeners)
+			return nil, fmt.Errorf("%s: %w", spec, err)
 		}
-	}
-	if filedescs != "" {
-		for _, fdString := range strings.Split(filedescs, ",") {
-			listener, err := openTCPListenerForFileDesc(fdString)
-			if err != nil {
-				CloseTCP(listeners)
-				return nil, err
-			}
-			listeners = append(listeners, listener)
-		}
+		listeners = append(listeners, listener)
 	}
 	return listeners, nil
 }
 
-func OpenUDP(addresses string, filedescs string) ([]*net.UDPConn, error) {
-	listeners := []*net.UDPConn{}
-	if addresses != "" {
-		for _, addressString := range strings.Split(addresses, ",") {
-			listener, err := openUDPListenerForAddress(addressString)
-			if err != nil {
-				CloseUDP(listeners)
-				return nil, err
-			}
-			listeners = append(listeners, listener)
-		}
+func OpenListenerFromJSON(spec map[string]interface{}) (net.Listener, error) {
+	listenerType, ok := spec["type"].(string)
+	if !ok {
+		return nil, errors.New("Listener object does not contain a string type field")
 	}
-	if filedescs != "" {
-		for _, fdString := range strings.Split(filedescs, ",") {
-			listener, err := openUDPListenerForFileDesc(fdString)
-			if err != nil {
-				CloseUDP(listeners)
-				return nil, err
-			}
-			listeners = append(listeners, listener)
-		}
-	}
-	return listeners, nil
+	return OpenListener(listenerType, spec, "")
 }
