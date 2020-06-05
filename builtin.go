@@ -97,9 +97,9 @@ func openProxyListener(params map[string]interface{}, arg string) (net.Listener,
 	var inner net.Listener
 	var err error
 	if arg != "" {
-		inner, err = OpenListenerFromSpec(arg)
+		inner, err = OpenFromSpec(arg)
 	} else if spec, ok := params["listener"].(map[string]interface{}); ok {
-		inner, err = OpenListenerFromJSON(spec)
+		inner, err = OpenFromJSON(spec)
 	} else {
 		return nil, errors.New("inner socket not specified for proxy listener")
 	}

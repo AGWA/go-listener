@@ -4,7 +4,7 @@ import (
 	"net"
 )
 
-func CloseListeners(listeners []net.Listener) {
+func CloseAll(listeners []net.Listener) {
 	for _, listener := range listeners {
 		listener.Close()
 	}
