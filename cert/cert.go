@@ -15,6 +15,7 @@ type cachedCertificate struct {
 	*tls.Certificate
 	modTime time.Time
 }
+
 func (c *cachedCertificate) isFresh(latestModTime time.Time) bool {
 	return c.Certificate != nil && c.modTime.Equal(latestModTime)
 }

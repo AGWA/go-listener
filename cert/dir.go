@@ -86,4 +86,3 @@ func (dir *CertificateDirectory) GetCertificate(hello *tls.ClientHelloInfo) (*tl
 
 	return nil, errors.New("No certificate found")
 }
-
