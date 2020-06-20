@@ -11,6 +11,8 @@ import (
 )
 
 type CertificateDirectory struct {
+	DefaultServerName string
+
 	path  string
 	mu    sync.RWMutex
 	cache map[string]cachedCertificate
@@ -67,7 +69,14 @@ func (dir *CertificateDirectory) CleanCache() {
 
 func (dir *CertificateDirectory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	serverName := hello.ServerName
-	if serverName == "" || serverName[0] == '.' || strings.IndexByte(hello.ServerName, '/') != -1 {
+	if serverName == "" {
+		if dir.DefaultServerName == "" {
+			return nil, errors.New("Client did not provide SNI and DefaultServerName is not set")
+		}
+		serverName = dir.DefaultServerName
+	}
+
+	if serverName[0] == '.' || strings.IndexByte(hello.ServerName, '/') != -1 {
 		return nil, errors.New("Server name is invalid")
 	}
 
