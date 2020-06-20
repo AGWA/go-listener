@@ -23,11 +23,10 @@ func NewCertificateDirectory(path string) *CertificateDirectory {
 	}
 }
 
-func (dir *CertificateDirectory) getCached(filename string) (cachedCertificate, bool) {
+func (dir *CertificateDirectory) getCached(filename string) cachedCertificate {
 	dir.mu.RLock()
 	defer dir.mu.RUnlock()
-	cert, ok := dir.cache[filename]
-	return cert, ok
+	return dir.cache[filename]
 }
 
 func (dir *CertificateDirectory) addToCache(filename string, cert cachedCertificate) {
@@ -36,19 +35,19 @@ func (dir *CertificateDirectory) addToCache(filename string, cert cachedCertific
 	dir.cache[filename] = cert
 }
 
-func (dir *CertificateDirectory) LoadCertificate(filename string) (tls.Certificate, error) {
+func (dir *CertificateDirectory) LoadCertificate(filename string) (*tls.Certificate, error) {
 	fileinfo, err := os.Stat(filepath.Join(dir.path, filename))
 	if err != nil {
-		return tls.Certificate{}, err
+		return nil, err
 	}
 	modTime := fileinfo.ModTime()
 
-	if cachedCert, isCached := dir.getCached(filename); isCached && cachedCert.modTime.Equal(modTime) {
+	if cachedCert := dir.getCached(filename); cachedCert.isFresh(modTime) {
 		return cachedCert.Certificate, nil
 	}
 	cert, err := LoadCertificate(filename)
 	if err != nil {
-		return tls.Certificate{}, err
+		return nil, err
 	}
 	dir.addToCache(filename, cachedCertificate{Certificate: cert, modTime: modTime})
 	return cert, nil
@@ -73,14 +72,14 @@ func (dir *CertificateDirectory) GetCertificate(hello *tls.ClientHelloInfo) (*tl
 	}
 
 	if cert, err := dir.LoadCertificate(serverName + ".pem"); err == nil {
-		return &cert, nil
+		return cert, nil
 	} else if !os.IsNotExist(err) {
 		// TODO: log this
 	}
 
 	serverName = replaceFirstLabel(serverName, "_")
 	if cert, err := dir.LoadCertificate(serverName + ".pem"); err == nil {
-		return &cert, nil
+		return cert, nil
 	} else if !os.IsNotExist(err) {
 		// TODO: log this
 	}

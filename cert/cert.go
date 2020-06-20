@@ -12,17 +12,20 @@ import (
 )
 
 type cachedCertificate struct {
-	tls.Certificate
+	*tls.Certificate
 	modTime time.Time
 }
+func (c *cachedCertificate) isFresh(latestModTime time.Time) bool {
+	return c.Certificate != nil && c.modTime.Equal(latestModTime)
+}
 
-func LoadCertificate(filename string) (tls.Certificate, error) {
+func LoadCertificate(filename string) (*tls.Certificate, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return tls.Certificate{}, err
+		return nil, err
 	}
 
-	var cert tls.Certificate
+	cert := new(tls.Certificate)
 	for {
 		block, rest := pem.Decode(data)
 		if block == nil {
@@ -31,36 +34,36 @@ func LoadCertificate(filename string) (tls.Certificate, error) {
 		switch block.Type {
 		case "PRIVATE KEY", "RSA PRIVATE KEY", "EC PRIVATE KEY":
 			if cert.PrivateKey != nil {
-				return tls.Certificate{}, errors.New("contains more than one private key")
+				return nil, errors.New("contains more than one private key")
 			}
 			cert.PrivateKey, err = parsePrivateKey(block)
 			if err != nil {
-				return tls.Certificate{}, fmt.Errorf("contains invalid private key: %w")
+				return nil, fmt.Errorf("contains invalid private key: %w")
 			}
 		case "CERTIFICATE":
 			cert.Certificate = append(cert.Certificate, block.Bytes)
 		case "OCSP RESPONSE":
 			if cert.OCSPStaple != nil {
-				return tls.Certificate{}, errors.New("contains more than one OCSP response")
+				return nil, errors.New("contains more than one OCSP response")
 			}
 			cert.OCSPStaple = block.Bytes
 		case "SIGNED CERTIFICATE TIMESTAMP":
 			cert.SignedCertificateTimestamps = append(cert.SignedCertificateTimestamps, block.Bytes)
 		default:
-			return tls.Certificate{}, errors.New("contains unrecognized PEM block `" + block.Type + "'")
+			return nil, errors.New("contains unrecognized PEM block `" + block.Type + "'")
 		}
 		data = rest
 	}
 
 	if cert.PrivateKey == nil {
-		return tls.Certificate{}, errors.New("doesn't contain any private key")
+		return nil, errors.New("doesn't contain any private key")
 	}
 	if len(cert.Certificate) == 0 {
-		return tls.Certificate{}, errors.New("doesn't contain any certificates")
+		return nil, errors.New("doesn't contain any certificates")
 	}
 	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
-		return tls.Certificate{}, fmt.Errorf("contains invalid leaf certificate: %w")
+		return nil, fmt.Errorf("contains invalid leaf certificate: %w")
 	}
 
 	return cert, nil
