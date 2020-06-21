@@ -8,17 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"time"
 )
-
-type cachedCertificate struct {
-	*tls.Certificate
-	modTime time.Time
-}
-
-func (c *cachedCertificate) isFresh(latestModTime time.Time) bool {
-	return c.Certificate != nil && c.modTime.Equal(latestModTime)
-}
 
 func LoadCertificate(filename string) (*tls.Certificate, error) {
 	data, err := ioutil.ReadFile(filename)

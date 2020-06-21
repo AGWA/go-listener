@@ -6,68 +6,25 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
-	"time"
 )
 
-type CertificateDirectory struct {
+type Directory struct {
+	Path              string
+	Cache             *FileCache
 	DefaultServerName string
-
-	path  string
-	mu    sync.RWMutex
-	cache map[string]cachedCertificate
 }
 
-func NewCertificateDirectory(path string) *CertificateDirectory {
-	return &CertificateDirectory{
-		path:  path,
-		cache: make(map[string]cachedCertificate),
+func (dir *Directory) LoadCertificate(filename string) (*tls.Certificate, error) {
+	fullpath := filepath.Join(dir.Path, filename)
+
+	if dir.Cache != nil {
+		return dir.Cache.Load(fullpath)
+	} else {
+		return LoadCertificate(fullpath)
 	}
 }
 
-func (dir *CertificateDirectory) getCached(filename string) cachedCertificate {
-	dir.mu.RLock()
-	defer dir.mu.RUnlock()
-	return dir.cache[filename]
-}
-
-func (dir *CertificateDirectory) addToCache(filename string, cert cachedCertificate) {
-	dir.mu.Lock()
-	defer dir.mu.Unlock()
-	dir.cache[filename] = cert
-}
-
-func (dir *CertificateDirectory) LoadCertificate(filename string) (*tls.Certificate, error) {
-	fileinfo, err := os.Stat(filepath.Join(dir.path, filename))
-	if err != nil {
-		return nil, err
-	}
-	modTime := fileinfo.ModTime()
-
-	if cachedCert := dir.getCached(filename); cachedCert.isFresh(modTime) {
-		return cachedCert.Certificate, nil
-	}
-	cert, err := LoadCertificate(filename)
-	if err != nil {
-		return nil, err
-	}
-	dir.addToCache(filename, cachedCertificate{Certificate: cert, modTime: modTime})
-	return cert, nil
-}
-
-func (dir *CertificateDirectory) CleanCache() {
-	dir.mu.Lock()
-	defer dir.mu.Unlock()
-
-	now := time.Now()
-	for filename, cert := range dir.cache {
-		if now.After(cert.Leaf.NotAfter) {
-			delete(dir.cache, filename)
-		}
-	}
-}
-
-func (dir *CertificateDirectory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+func (dir *Directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	serverName := hello.ServerName
 	if serverName == "" {
 		if dir.DefaultServerName == "" {
@@ -94,4 +51,13 @@ func (dir *CertificateDirectory) GetCertificate(hello *tls.ClientHelloInfo) (*tl
 	}
 
 	return nil, errors.New("No certificate found")
+}
+
+func replaceFirstLabel(hostname string, replacement string) string {
+	dot := strings.IndexByte(hostname, '.')
+	if dot == -1 {
+		return replacement
+	} else {
+		return replacement + hostname[dot:]
+	}
 }
