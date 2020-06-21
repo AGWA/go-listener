@@ -10,6 +10,8 @@ import (
 	"io/ioutil"
 )
 
+type GetCertificateFunc func(*tls.ClientHelloInfo) (*tls.Certificate, error)
+
 func LoadCertificate(filename string) (*tls.Certificate, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
