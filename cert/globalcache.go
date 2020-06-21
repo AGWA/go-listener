@@ -7,7 +7,7 @@ import (
 
 var (
 	globalFileCache     *FileCache
-	globalFileCacheOnce sync.Once
+	globalFileCacheInit sync.Once
 )
 
 func cleanGlobalFileCache() {
@@ -17,7 +17,7 @@ func cleanGlobalFileCache() {
 }
 
 func GlobalFileCache() *FileCache {
-	globalFileCacheOnce.Do(func() {
+	globalFileCacheInit.Do(func() {
 		globalFileCache = NewFileCache()
 		go cleanGlobalFileCache()
 	})
