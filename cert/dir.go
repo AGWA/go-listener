@@ -14,7 +14,7 @@ type Directory struct {
 	DefaultServerName string
 }
 
-func (dir *Directory) LoadCertificate(filename string) (*tls.Certificate, error) {
+func (dir *Directory) loadCertificate(filename string) (*tls.Certificate, error) {
 	fullpath := filepath.Join(dir.Path, filename)
 
 	if dir.Cache != nil {
@@ -37,14 +37,14 @@ func (dir *Directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 		return nil, errors.New("Server name is invalid")
 	}
 
-	if cert, err := dir.LoadCertificate(serverName + ".pem"); err == nil {
+	if cert, err := dir.loadCertificate(serverName + ".pem"); err == nil {
 		return cert, nil
 	} else if !os.IsNotExist(err) {
 		// TODO: log this
 	}
 
 	serverName = replaceFirstLabel(serverName, "_")
-	if cert, err := dir.LoadCertificate(serverName + ".pem"); err == nil {
+	if cert, err := dir.loadCertificate(serverName + ".pem"); err == nil {
 		return cert, nil
 	} else if !os.IsNotExist(err) {
 		// TODO: log this
