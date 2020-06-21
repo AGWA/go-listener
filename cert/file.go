@@ -4,7 +4,7 @@ import (
 	"crypto/tls"
 )
 
-func GetCertificateForFile(path string) GetCertificateFunc {
+func GetCertificateFromFile(path string) GetCertificateFunc {
 	cache := GlobalFileCache()
 
 	return func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {

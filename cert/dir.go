@@ -61,3 +61,11 @@ func replaceFirstLabel(hostname string, replacement string) string {
 		return replacement + hostname[dot:]
 	}
 }
+
+func GetCertificateFromDirectory(path string) GetCertificateFunc {
+	dir := &Directory{
+		Path:  path,
+		Cache: GlobalFileCache(),
+	}
+	return dir.GetCertificate
+}
