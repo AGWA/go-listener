@@ -2,7 +2,6 @@ package socketdir
 
 import (
 	"io"
-	"sync"
 
 	"src.agwa.name/go-listener/proxy"
 )
@@ -28,21 +27,12 @@ func ProxyConnection(protocol ProxyProto, clientConn Conn, backendConn Conn) {
 }
 
 func proxyConnectionPlain(clientConn Conn, backendConn Conn) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		io.Copy(clientConn, backendConn)
-		clientConn.CloseWrite()
-		wg.Done()
-	}()
 	go func() {
 		io.Copy(backendConn, clientConn)
 		backendConn.CloseWrite()
-		wg.Done()
 	}()
 
-	wg.Wait()
+	io.Copy(clientConn, backendConn)
 }
 
 func proxyConnectionProxy(clientConn Conn, backendConn Conn) {
