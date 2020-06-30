@@ -21,7 +21,7 @@ func getAutocertCache() autocert.Cache {
 	}
 }
 
-func GetCertificateAutomatically(hostnames []string) GetCertificateFunc {
+func getCertificateAutomatically(hostPolicy autocert.HostPolicy) GetCertificateFunc {
 	manager := &autocert.Manager{
 		Client: &acme.Client{
 			DirectoryURL: os.Getenv("AUTOCERT_ACME_SERVER"),
@@ -29,8 +29,16 @@ func GetCertificateAutomatically(hostnames []string) GetCertificateFunc {
 
 		Prompt:     autocert.AcceptTOS,
 		Cache:      getAutocertCache(),
-		HostPolicy: autocert.HostWhitelist(hostnames...),
+		HostPolicy: hostPolicy,
 		Email:      os.Getenv("AUTOCERT_EMAIL"),
 	}
 	return manager.GetCertificate
+}
+
+func GetCertificateAutomatically(hostnames []string) GetCertificateFunc {
+	if hostnames == nil {
+		return getCertificateAutomatically(nil)
+	} else {
+		return getCertificateAutomatically(autocert.HostWhitelist(hostnames...))
+	}
 }
