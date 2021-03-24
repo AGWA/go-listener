@@ -7,12 +7,10 @@ import (
 	"src.agwa.name/go-listener"
 	"src.agwa.name/go-listener/cert"
 	"src.agwa.name/go-listener/socketdir"
-	"strings"
 )
 
 func main() {
 	var (
-		listenSpecs       = flag.String("listen", "443", "Specification of listeners")
 		socketDirectory   = flag.String("sockets", "/var/tls", "Directory for backend sockets")
 		defaultHostname   = flag.String("default-hostname", "", "Default hostname if client does not provide SNI")
 		defaultProtocol   = flag.String("default-protocol", "", "Default protocol if client does not provide ALPN")
@@ -21,7 +19,7 @@ func main() {
 	)
 	flag.Parse()
 
-	ourListeners, err := listener.OpenAll(strings.Split(*listenSpecs, ","))
+	ourListeners, err := listener.OpenAll(flag.Args())
 	if err != nil {
 		log.Fatal(err)
 	}
