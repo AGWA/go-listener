@@ -14,7 +14,7 @@ func main() {
 		socketDirectory   = flag.String("sockets", "/var/tls", "Directory for backend sockets")
 		defaultHostname   = flag.String("default-hostname", "", "Default hostname if client does not provide SNI")
 		defaultProtocol   = flag.String("default-protocol", "", "Default protocol if client does not provide ALPN")
-		certDirectoryFlag = flag.String("certs", "/var/lib/certs", "Directory containing certificate bundles with the name SERVERNAME.pem")
+		certDirectoryFlag = flag.String("certs", "", "Directory containing certificate bundles with the name SERVERNAME.pem")
 		autocertFlag      = flag.Bool("autocert", false, "Obtain certificates automatically")
 	)
 	flag.Parse()
