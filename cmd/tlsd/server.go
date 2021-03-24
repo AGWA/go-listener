@@ -76,6 +76,10 @@ func (server *Server) peekClientHello(clientConn net.Conn) (*tls.ClientHelloInfo
 }
 
 func (server *Server) terminateTLS(clientConn net.Conn, clientHello *tls.ClientHelloInfo, protocol string) (*tls.Conn, error) {
+	if server.GetCertificate == nil {
+		return nil, errors.New("certificate source not configured")
+	}
+
 	cert, err := server.GetCertificate(clientHello)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get certificate: %w", err)
