@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"src.agwa.name/go-listener/proxy"
+	"src.agwa.name/go-listener/unix"
 )
 
 func init() {
@@ -90,7 +91,7 @@ func openUnixListener(params map[string]interface{}, arg string) (net.Listener, 
 	} else {
 		return nil, errors.New("path not specified for UNIX listener")
 	}
-	return net.ListenUnix("unix", &net.UnixAddr{Net: "unix", Name: path})
+	return unix.Listen(path, 0666)
 }
 
 func openProxyListener(params map[string]interface{}, arg string) (net.Listener, error) {
