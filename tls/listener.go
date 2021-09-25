@@ -6,16 +6,19 @@ import (
 	"net"
 	"strings"
 
+	"golang.org/x/crypto/acme"
 	"src.agwa.name/go-listener"
 	"src.agwa.name/go-listener/cert"
 )
 
 func init() {
-	listener.RegisterListenerType("tls", openTLSListener)
+	listener.RegisterListenerType("tls", openHTTPSListener) // TODO: either remove this listener type or replace it with a generic TLS non-HTTPS listener
+	listener.RegisterListenerType("https", openHTTPSListener)
 }
 
-func openTLSListener(params map[string]interface{}, arg string) (net.Listener, error) {
+func openHTTPSListener(params map[string]interface{}, arg string) (net.Listener, error) {
 	var getCertificate cert.GetCertificateFunc
+	var nextProtos = []string{"h2", "http/1.1"}
 	var inner net.Listener
 	var err error
 
@@ -32,6 +35,7 @@ func openTLSListener(params map[string]interface{}, arg string) (net.Listener, e
 			getCertificate = cert.GetCertificateFromFile(certSpec)
 		} else {
 			getCertificate = cert.GetCertificateAutomatically(strings.Split(certSpec, ","))
+			nextProtos = append(nextProtos, acme.ALPNProto)
 		}
 
 		inner, err = listener.Open(innerSpec)
@@ -45,6 +49,7 @@ func openTLSListener(params map[string]interface{}, arg string) (net.Listener, e
 			getCertificate = cert.GetCertificateFromDirectory(path)
 		} else if hostnames, ok := params["autocert_hostnames"].([]string); ok {
 			getCertificate = cert.GetCertificateAutomatically(hostnames)
+			nextProtos = append(nextProtos, acme.ALPNProto)
 		} else {
 			return nil, errors.New("certificate not specified for TLS listener")
 		}
@@ -65,6 +70,7 @@ func openTLSListener(params map[string]interface{}, arg string) (net.Listener, e
 
 	config := &tls.Config{
 		GetCertificate: getCertificate,
+		NextProtos:     nextProtos,
 	}
 
 	return tls.NewListener(inner, config), nil
