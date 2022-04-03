@@ -7,15 +7,15 @@ import (
 	"time"
 )
 
-type Listener struct {
+type proxyListener struct {
 	inner  net.Listener
 	conns  chan net.Conn
 	errors chan error
 	done   chan struct{}
 }
 
-func NewListener(inner net.Listener) *Listener {
-	listener := &Listener{
+func NewListener(inner net.Listener) net.Listener {
+	listener := &proxyListener{
 		inner:  inner,
 		conns:  make(chan net.Conn),
 		errors: make(chan error),
@@ -25,7 +25,7 @@ func NewListener(inner net.Listener) *Listener {
 	return listener
 }
 
-func (listener *Listener) Accept() (net.Conn, error) {
+func (listener *proxyListener) Accept() (net.Conn, error) {
 	select {
 	case conn := <-listener.conns:
 		return conn, nil
@@ -36,16 +36,16 @@ func (listener *Listener) Accept() (net.Conn, error) {
 	}
 }
 
-func (listener *Listener) Close() error {
+func (listener *proxyListener) Close() error {
 	close(listener.done)
 	return listener.inner.Close()
 }
 
-func (listener *Listener) Addr() net.Addr {
+func (listener *proxyListener) Addr() net.Addr {
 	return listener.inner.Addr()
 }
 
-func (listener *Listener) handleAccepts() {
+func (listener *proxyListener) handleAccepts() {
 	for {
 		conn, err := listener.inner.Accept()
 		if err != nil {
@@ -59,7 +59,7 @@ func (listener *Listener) handleAccepts() {
 	}
 }
 
-func (listener *Listener) handleConnection(conn net.Conn) {
+func (listener *proxyListener) handleConnection(conn net.Conn) {
 	if err := conn.SetReadDeadline(time.Now().Add(1 * time.Minute)); err != nil {
 		conn.Close()
 		listener.sendError(&acceptError{error: err, temporary: true})
@@ -90,7 +90,7 @@ func (listener *Listener) handleConnection(conn net.Conn) {
 	}
 }
 
-func (listener *Listener) sendError(err error) bool {
+func (listener *proxyListener) sendError(err error) bool {
 	select {
 	case listener.errors <- err:
 		return true
@@ -99,7 +99,7 @@ func (listener *Listener) sendError(err error) bool {
 	}
 }
 
-func (listener *Listener) sendConn(conn net.Conn) bool {
+func (listener *proxyListener) sendConn(conn net.Conn) bool {
 	select {
 	case listener.conns <- conn:
 		return true
