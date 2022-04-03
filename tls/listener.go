@@ -8,7 +8,7 @@ import (
 
 	"golang.org/x/crypto/acme"
 	"src.agwa.name/go-listener"
-	"src.agwa.name/go-listener/cert"
+	"src.agwa.name/go-listener/internal/cert"
 )
 
 func init() {

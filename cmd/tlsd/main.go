@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 	"src.agwa.name/go-listener"
-	"src.agwa.name/go-listener/cert"
-	"src.agwa.name/go-listener/socketdir"
+	"src.agwa.name/go-listener/internal/cert"
+	"src.agwa.name/go-listener/internal/socketdir"
 )
 
 func main() {

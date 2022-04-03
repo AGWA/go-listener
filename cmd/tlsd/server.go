@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	"src.agwa.name/go-listener/socketdir"
+	"src.agwa.name/go-listener/internal/socketdir"
 	"src.agwa.name/go-listener/proxy"
 	"src.agwa.name/go-listener/tlsutil"
 )
