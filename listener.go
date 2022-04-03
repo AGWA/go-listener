@@ -9,7 +9,7 @@ type OpenListenerFunc func(map[string]interface{}, string) (net.Listener, error)
 
 var (
 	listenerTypes   = make(map[string]OpenListenerFunc)
-	listenerTypesMu sync.Mutex
+	listenerTypesMu sync.RWMutex
 )
 
 func RegisterListenerType(name string, openListener OpenListenerFunc) {
@@ -26,7 +26,7 @@ func RegisterListenerType(name string, openListener OpenListenerFunc) {
 }
 
 func getOpenListenerFunc(listenerType string) OpenListenerFunc {
-	listenerTypesMu.Lock()
-	defer listenerTypesMu.Unlock()
+	listenerTypesMu.RLock()
+	defer listenerTypesMu.RUnlock()
 	return listenerTypes[listenerType]
 }
