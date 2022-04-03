@@ -26,11 +26,13 @@ const (
 	familyUDP6        = 0x22
 )
 
+// Header represents a PROXY protocol header
 type Header struct {
 	RemoteAddr net.Addr
 	LocalAddr  net.Addr
 }
 
+// Read the PROXY protocol header from conn
 func ReadHeader(conn net.Conn) (*Header, error) {
 	var preamble [16]byte
 	if _, err := io.ReadFull(conn, preamble[:]); err != nil {
@@ -130,6 +132,7 @@ func parseProxyHeader(family uint8, payload []byte) (*Header, error) {
 	}
 }
 
+// Return the wire representation of header
 func (header Header) Format() []byte {
 	switch remoteAddr := header.RemoteAddr.(type) {
 	case *net.TCPAddr:

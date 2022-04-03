@@ -1,4 +1,5 @@
-package tlsutil
+// Package tlsutil provides helper functions for working with TLS.
+package tlsutil // import "src.agwa.name/go-listener/tlsutil"
 
 import (
 	"bytes"

@@ -1,4 +1,5 @@
-package unix
+// Package unix implements a net.Listener for UNIX domain sockets.
+package unix // import "src.agwa.name/go-listener/unix"
 
 import (
 	"fmt"
@@ -50,6 +51,10 @@ func (wl *watchedListener) watch(path string, info os.FileInfo) {
 	}
 }
 
+// Create a listening UNIX domain socket with the given path and filesystem
+// permissions.  If a file already exists at the path, it is replaced.  If
+// the UNIX domain socket file is removed or changed, then within 5 seconds
+// the net.Listener will be closed, and Accept will return an error.
 func Listen(path string, mode os.FileMode) (net.Listener, error) {
 	tempDir, err := os.MkdirTemp(filepath.Dir(path), ".tmp")
 	if err != nil {

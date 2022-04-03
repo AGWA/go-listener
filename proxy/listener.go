@@ -1,4 +1,5 @@
-package proxy
+// Package proxy implements version 2 of the PROXY protocol (https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt)
+package proxy // import "src.agwa.name/go-listener/proxy"
 
 import (
 	"errors"
@@ -14,6 +15,10 @@ type proxyListener struct {
 	done   chan struct{}
 }
 
+// NewListener creates a net.Listener which accepts connections from an
+// inner net.Listener, reads the PROXY v2 header from the client, and
+// sets the local and remote addresses of the net.Conn to the values
+// specified in the PROXY header.
 func NewListener(inner net.Listener) net.Listener {
 	listener := &proxyListener{
 		inner:  inner,

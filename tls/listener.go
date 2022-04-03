@@ -1,4 +1,11 @@
-package tls
+// Package tls adds support for TLS listeners to src.agwa.name/go-listener.
+//
+// This package contains no exported identifiers and is intended to be
+// imported from package main like this:
+//
+//     import _ "src.agwa.name/go-listener/tls"
+//
+package tls // import "src.agwa.name/go-listener/tls"
 
 import (
 	"crypto/tls"
