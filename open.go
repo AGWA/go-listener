@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func OpenType(listenerType string, params map[string]interface{}, argument string) (net.Listener, error) {
+func openType(listenerType string, params map[string]interface{}, argument string) (net.Listener, error) {
 	openListener := getOpenListenerFunc(listenerType)
 	if openListener == nil {
 		return nil, fmt.Errorf("Unknown listener type: " + listenerType)
@@ -19,7 +19,7 @@ func Open(spec string) (net.Listener, error) {
 	if strings.Contains(spec, ":") {
 		fields := strings.SplitN(spec, ":", 2)
 		listenerType, arg := fields[0], fields[1]
-		return OpenType(listenerType, nil, arg)
+		return openType(listenerType, nil, arg)
 	} else {
 		return openTCPListener(nil, spec)
 	}
@@ -43,5 +43,5 @@ func OpenJSON(spec map[string]interface{}) (net.Listener, error) {
 	if !ok {
 		return nil, errors.New("Listener object does not contain a string type field")
 	}
-	return OpenType(listenerType, spec, "")
+	return openType(listenerType, spec, "")
 }
