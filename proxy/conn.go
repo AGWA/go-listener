@@ -4,16 +4,16 @@ import (
 	"net"
 )
 
-type Conn struct {
+type proxyConn struct {
 	net.Conn
 	localAddr  net.Addr
 	remoteAddr net.Addr
 }
 
-func (conn *Conn) LocalAddr() net.Addr {
+func (conn *proxyConn) LocalAddr() net.Addr {
 	return conn.localAddr
 }
 
-func (conn *Conn) RemoteAddr() net.Addr {
+func (conn *proxyConn) RemoteAddr() net.Addr {
 	return conn.remoteAddr
 }

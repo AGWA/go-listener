@@ -80,7 +80,7 @@ func (listener *Listener) handleConnection(conn net.Conn) {
 		return
 	}
 
-	proxyConn := &Conn{
+	proxyConn := &proxyConn{
 		Conn:       conn,
 		localAddr:  header.LocalAddr,
 		remoteAddr: header.RemoteAddr,
