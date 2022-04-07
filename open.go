@@ -67,7 +67,7 @@ func OpenAll(specs []string) ([]net.Listener, error) {
 	return listeners, nil
 }
 
-// Open a listener with the given JSON notation.  Note that numbers in spec
+// Experimental: Open a listener with the given JSON notation.  Note that numbers in spec
 // must be represented using json.Number.
 func OpenJSON(spec map[string]interface{}) (net.Listener, error) {
 	listenerType, ok := spec["type"].(string)
