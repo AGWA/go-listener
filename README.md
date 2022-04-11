@@ -1,5 +1,7 @@
 # `go-listener`
 
+[![Documentation](https://pkg.go.dev/badge/src.agwa.name/go-listener)](https://pkg.go.dev/src.agwa.name/go-listener)
+
 `src.agwa.name/go-listener` is a Go library for creating `net.Listener`s.
 
 Typically, server software only supports listening on TCP ports.  `go-listener` makes it easy to also listen on:
