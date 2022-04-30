@@ -118,6 +118,8 @@ When you obtain certificates automatically, the following environment variables 
 | ---------------------- | ----------- | ------- |
 | `AUTOCERT_ACME_SERVER` | The directory URL of the certificate authority's ACME server | [`autocert.DefaultACMEDirectory`](https://pkg.go.dev/golang.org/x/crypto/acme/autocert#DefaultACMEDirectory) |
 | `AUTOCERT_EMAIL`       | Contact email address for your ACME account, used by certificate authority to notify you of certificate problems (highly recommended) | (none) |
+| `AUTOCERT_EAB_KID`     | Key ID of the External Account Binding to use with ACME | (none) |
+| `AUTOCERT_EAB_KEY`     | base64url-encoded HMAC-SHA256 key of the External Account Binding to use with ACME | (none) |
 | `AUTOCERT_CACHE_DIR`   | The directory where issued certificates are stored | When root, `/var/lib/autocert-cache`; otherwise, `autocert-cache` under [`$XDG_DATA_HOME`](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html) |
 
 ## Example

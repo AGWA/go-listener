@@ -26,6 +26,7 @@
 package cert
 
 import (
+	"encoding/base64"
 	"golang.org/x/crypto/acme"
 	"golang.org/x/crypto/acme/autocert"
 	"os"
@@ -46,6 +47,25 @@ func getAutocertCache() autocert.Cache {
 	}
 }
 
+func getAutocertEAB() *acme.ExternalAccountBinding {
+	kidString := os.Getenv("AUTOCERT_EAB_KID")
+	keyString := os.Getenv("AUTOCERT_EAB_KEY")
+
+	if kidString == "" || keyString == "" {
+		return nil
+	}
+
+	key, err := base64.RawURLEncoding.DecodeString(keyString)
+	if err != nil {
+		return nil
+	}
+
+	return &acme.ExternalAccountBinding{
+		KID: kidString,
+		Key: key,
+	}
+}
+
 func getCertificateAutomatically(hostPolicy autocert.HostPolicy) GetCertificateFunc {
 	manager := &autocert.Manager{
 		Client: &acme.Client{
@@ -56,6 +76,8 @@ func getCertificateAutomatically(hostPolicy autocert.HostPolicy) GetCertificateF
 		Cache:      getAutocertCache(),
 		HostPolicy: hostPolicy,
 		Email:      os.Getenv("AUTOCERT_EMAIL"),
+
+		ExternalAccountBinding: getAutocertEAB(),
 	}
 	return manager.GetCertificate
 }
