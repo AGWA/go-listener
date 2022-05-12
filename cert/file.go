@@ -29,6 +29,10 @@ import (
 	"crypto/tls"
 )
 
+// Return a GetCertificateFunc that gets the certificate from the given file.
+// The file is reloaded automatically when it changes, allowing zero-downtime
+// certificate rotation.  See the documentation of LoadCertificate for the
+// required format of the file.
 func GetCertificateFromFile(path string) GetCertificateFunc {
 	cache := GlobalFileCache()
 

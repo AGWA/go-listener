@@ -82,6 +82,10 @@ func getCertificateAutomatically(hostPolicy autocert.HostPolicy) GetCertificateF
 	return manager.GetCertificate
 }
 
+// Returns a GetCertificateFunc that automatically obtains certificates using ACME
+// for the given hostnames.  The environment variables $AUTOCERT_ACME_SERVER,
+// $AUTOCERT_EMAIL, and $AUTOCERT_CACHE_DIR can be used to customize the ACME
+// client.  See the go-listener README for details: https://pkg.go.dev/src.agwa.name/go-listener#readme-acme-configuration
 func GetCertificateAutomatically(hostnames []string) GetCertificateFunc {
 	if hostnames == nil {
 		return getCertificateAutomatically(nil)
