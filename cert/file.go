@@ -34,7 +34,7 @@ import (
 // certificate rotation.  See the documentation of LoadCertificate for the
 // required format of the file.
 func GetCertificateFromFile(path string) GetCertificateFunc {
-	cache := GlobalFileCache()
+	cache := globalFileCache()
 
 	return func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 		return cache.Load(path)

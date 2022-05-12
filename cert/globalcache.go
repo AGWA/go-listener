@@ -31,20 +31,20 @@ import (
 )
 
 var (
-	globalFileCache     *FileCache
+	globalFileCachePtr  *fileCache
 	globalFileCacheInit sync.Once
 )
 
 func cleanGlobalFileCache() {
 	for range time.Tick(24 * time.Hour) {
-		globalFileCache.Clean()
+		globalFileCachePtr.Clean()
 	}
 }
 
-func GlobalFileCache() *FileCache {
+func globalFileCache() *fileCache {
 	globalFileCacheInit.Do(func() {
-		globalFileCache = NewFileCache()
+		globalFileCachePtr = newFileCache()
 		go cleanGlobalFileCache()
 	})
-	return globalFileCache
+	return globalFileCachePtr
 }

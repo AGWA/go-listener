@@ -33,12 +33,12 @@ import (
 	"strings"
 )
 
-type Directory struct {
+type directory struct {
 	Path  string
-	Cache *FileCache
+	Cache *fileCache
 }
 
-func (dir *Directory) loadCertificate(filename string) (*tls.Certificate, error) {
+func (dir *directory) loadCertificate(filename string) (*tls.Certificate, error) {
 	fullpath := filepath.Join(dir.Path, filename)
 
 	if dir.Cache != nil {
@@ -48,7 +48,7 @@ func (dir *Directory) loadCertificate(filename string) (*tls.Certificate, error)
 	}
 }
 
-func (dir *Directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	serverName := hello.ServerName
 	if serverName == "" {
 		return nil, errors.New("Client does not support SNI")
@@ -88,9 +88,9 @@ func replaceFirstLabel(hostname string, replacement string) string {
 // when they change, allowing zero-downtime certificate rotation.
 // See the documentation of LoadCertificate for the required format of the files.
 func GetCertificateFromDirectory(path string) GetCertificateFunc {
-	dir := &Directory{
+	dir := &directory{
 		Path:  path,
-		Cache: GlobalFileCache(),
+		Cache: globalFileCache(),
 	}
 	return dir.GetCertificate
 }

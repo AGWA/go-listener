@@ -41,30 +41,30 @@ func (c *cachedFile) isFresh(latestModTime time.Time) bool {
 	return c.Certificate != nil && c.modTime.Equal(latestModTime)
 }
 
-type FileCache struct {
+type fileCache struct {
 	mu    sync.RWMutex
 	certs map[string]cachedFile
 }
 
-func NewFileCache() *FileCache {
-	return &FileCache{
+func newFileCache() *fileCache {
+	return &fileCache{
 		certs: make(map[string]cachedFile),
 	}
 }
 
-func (c *FileCache) get(filename string) cachedFile {
+func (c *fileCache) get(filename string) cachedFile {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	return c.certs[filename]
 }
 
-func (c *FileCache) add(filename string, cert cachedFile) {
+func (c *fileCache) add(filename string, cert cachedFile) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.certs[filename] = cert
 }
 
-func (c *FileCache) Load(filename string) (*tls.Certificate, error) {
+func (c *fileCache) Load(filename string) (*tls.Certificate, error) {
 	fileinfo, err := os.Stat(filename)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (c *FileCache) Load(filename string) (*tls.Certificate, error) {
 	return cert, nil
 }
 
-func (c *FileCache) Clean() {
+func (c *fileCache) Clean() {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
