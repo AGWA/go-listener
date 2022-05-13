@@ -30,6 +30,14 @@ import (
 	"sync"
 )
 
+// A function that is called by Open or OpenJSON to create a net.Listener of
+// a particular type.  If called by Open, then the first argument is nil,
+// and the second argument is the string passed to Open, with the listener
+// type and colon character removed.  If called by OpenJSON, the first argument
+// is the JSON object passed to OpenJSON, and the second argument is empty.
+//
+// You only need to care about this if you are extending go-listener with
+// your own custom listener types using RegisterListenerType.
 type OpenListenerFunc func(map[string]interface{}, string) (net.Listener, error)
 
 var (
@@ -39,6 +47,7 @@ var (
 
 // RegisterListenerType makes a listener type available by the provided name.
 // Use this function to extend go-listener with your own custom listener types.
+// See the documentation for OpenListenerFunc for details.
 //
 // If RegisterListenerType is called twice with the same name or if
 // openListener is nil, it panics.

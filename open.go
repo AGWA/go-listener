@@ -53,7 +53,7 @@ func Open(spec string) (net.Listener, error) {
 
 // Open all of the listeners specified in specs (using string notation).
 // If any listener fails to open, an error is returned, and none of the
-// listeners are opened.
+// listeners are left open.
 func OpenAll(specs []string) ([]net.Listener, error) {
 	listeners := []net.Listener{}
 	for _, spec := range specs {
