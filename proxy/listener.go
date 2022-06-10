@@ -40,9 +40,9 @@ type proxyListener struct {
 	done   chan struct{}
 }
 
-// NewListener creates a net.Listener which accepts connections from an
+// NewListener creates a [net.Listener] which accepts connections from an
 // inner net.Listener, reads the PROXY v2 header from the client, and
-// sets the local and remote addresses of the net.Conn to the values
+// sets the local and remote addresses of the [net.Conn] to the values
 // specified in the PROXY header.
 func NewListener(inner net.Listener) net.Listener {
 	listener := &proxyListener{

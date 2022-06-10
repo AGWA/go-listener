@@ -82,11 +82,11 @@ func replaceFirstLabel(hostname string, replacement string) string {
 	}
 }
 
-// Return a GetCertificateFunc that gets the certificate from a file
+// Return a [GetCertificateFunc] that gets the certificate from a file
 // named SERVER_NAME.pem in the given directory, where SERVER_NAME is
 // the SNI hostname provided by the client.  File are reloaded automatically
 // when they change, allowing zero-downtime certificate rotation.
-// See the documentation of LoadCertificate for the required format of the files.
+// See the documentation of [LoadCertificate] for the required format of the files.
 func GetCertificateFromDirectory(path string) GetCertificateFunc {
 	dir := &directory{
 		Path:  path,

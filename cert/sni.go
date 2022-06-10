@@ -29,7 +29,7 @@ import (
 	"crypto/tls"
 )
 
-// Wraps a GetCertificateFunc with logic that sets ClientHelloInfo.ServerName
+// Wraps a [GetCertificateFunc] with logic that sets [tls.ClientHelloInfo.ServerName]
 // to defaultServerName if it is empty (e.g. because the client does not support SNI).
 func GetCertificateDefaultServerName(defaultServerName string, getCertificate GetCertificateFunc) GetCertificateFunc {
 	return func(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {

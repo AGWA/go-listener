@@ -36,15 +36,15 @@ import (
 	"io/ioutil"
 )
 
-// A function that returns a tls.Certificate based on the given tls.ClientHelloInfo
+// A function that returns a [tls.Certificate] based on the given [tls.ClientHelloInfo]
 type GetCertificateFunc func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 
-// Load a tls.Certificate from the given PEM-encoded file.  The file must contain
+// Load a [tls.Certificate] from the given PEM-encoded file.  The file must contain
 // the following blocks:
-// - Exactly one PRIVATE KEY, containing the private key in PKCS#8 format.
-// - At least one CERTIFICATE, comprising the certificate chain, leaf certificate first and root certificate omitted.
-// - Up to one OCSP RESPONSE, containing a stapled OCSP response.
-// - Any number of SIGNED CERTIFICATE TIMESTAMP, containing stapled SCTs.
+//   - Exactly one PRIVATE KEY, containing the private key in PKCS#8 format.
+//   - At least one CERTIFICATE, comprising the certificate chain, leaf certificate first and root certificate omitted.
+//   - Up to one OCSP RESPONSE, containing a stapled OCSP response.
+//   - Any number of SIGNED CERTIFICATE TIMESTAMP, containing stapled SCTs.
 func LoadCertificate(filename string) (*tls.Certificate, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
