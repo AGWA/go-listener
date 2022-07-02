@@ -87,6 +87,12 @@ func replaceFirstLabel(hostname string, replacement string) string {
 // the SNI hostname provided by the client.  File are reloaded automatically
 // when they change, allowing zero-downtime certificate rotation.
 // See the documentation of [LoadCertificate] for the required format of the files.
+//
+// The GetCertificateFunc returns an error, causing the TLS connection to be
+// terminated, if no certificate file exists for the SNI hostname or if the
+// client did not provide an SNI hostname.  If you need to support clients
+// that don't provide SNI, wrap the GetCertificateFunc with
+// [GetCertificateDefaultServerName] to specify a default SNI hostname.
 func GetCertificateFromDirectory(path string) GetCertificateFunc {
 	dir := &directory{
 		Path:  path,
