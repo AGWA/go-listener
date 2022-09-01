@@ -41,10 +41,28 @@ Listen on all interfaces:
 tcp:PORT
 ```
 
-Listen on a specific interface:
+Listen on a specific IPv4 interface:
 
 ```
-tcp:ADDRESS:PORT
+tcp:IPV4ADDRESS:PORT
+```
+
+Listen on a specific IPv6 interface:
+
+```
+tcp:[IPV6ADDRESS]:PORT
+```
+
+Listen on all IPv4 interfaces:
+
+```
+tcp:0.0.0.0:PORT
+
+```
+Listen on all IPv6 interfaces:
+
+```
+tcp:[::]:PORT
 ```
 
 ### UNIX Domain Socket
