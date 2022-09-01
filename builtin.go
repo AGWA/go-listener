@@ -90,12 +90,21 @@ func openTCPListener(params map[string]interface{}, arg string) (net.Listener, e
 		portString = param
 	}
 
+	network := "tcp"
 	address := new(net.TCPAddr)
 
 	if ipString != "" {
 		address.IP = net.ParseIP(ipString)
 		if address.IP == nil {
 			return nil, errors.New("TCP listener has invalid IP address")
+		}
+
+		// Explicitly specify the IP protocol, to ensure that 0.0.0.0
+		// and :: work as expected (listen only on IPv4 or IPv6 interfaces)
+		if address.IP.To4() == nil {
+			network = "tcp6"
+		} else {
+			network = "tcp4"
 		}
 	}
 
@@ -104,7 +113,7 @@ func openTCPListener(params map[string]interface{}, arg string) (net.Listener, e
 		return nil, fmt.Errorf("TCP listener has invalid port: %w", err)
 	}
 
-	return net.ListenTCP("tcp", address)
+	return net.ListenTCP(network, address)
 }
 
 func openUnixListener(params map[string]interface{}, arg string) (net.Listener, error) {
