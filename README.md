@@ -225,3 +225,32 @@ httpd -listen tls:/etc/ssl/example.com.pem:proxy:unix:/run/example.sock
 ```
 
 (Details: `go-listener` will listen on `/run/example.sock`.  When a connection is accepted, `go-listener` will first read the PROXY protocol header to get the true client IP address, which will be made available through the `net.Conn`'s `LocalAddr` method.  It will then do a TLS handshake using the private key and certificate in `/etc/ssl/example.com.pem`.)
+
+### Socket Activation
+
+Here's how to use systemd socket activation to run httpd as an unprivileged user listening on port 80 (which is a privileged port):
+
+In `/etc/systemd/system/httpd.socket` put:
+
+```
+[Socket]
+ListenStream=80
+
+[Install]
+WantedBy=sockets.target
+```
+
+In `/etc/systemd/system/httpd.service` put:
+
+```
+[Service]
+ExecStart=/path/to/httpd -listen fd:3
+DynamicUser=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+You can also name the socket using the `FileDescriptorName` option in the `httpd.socket` file, and refer to it using the `fdname` listener type (instead of `fd:3`).
+
+You don't have to use systemd; the `fd` listener type can be used with any process supervisor which supports listening on a file descriptor, dropping privileges, and passing the listening file descriptor to the daemon.
