@@ -40,6 +40,7 @@ import (
 
 func init() {
 	RegisterListenerType("fd", openFDListener)
+	RegisterListenerType("fdname", openFDNameListener)
 	RegisterListenerType("tcp", openTCPListener)
 	RegisterListenerType("unix", openUnixListener)
 	RegisterListenerType("proxy", openProxyListener)
@@ -66,6 +67,35 @@ func openFDListener(params map[string]interface{}, arg string) (net.Listener, er
 	defer file.Close()
 
 	return net.FileListener(file)
+}
+
+func openFDNameListener(params map[string]interface{}, arg string) (net.Listener, error) {
+	var name string
+	if arg != "" {
+		name = arg
+	} else if param, ok := params["name"].(string); ok {
+		name = param
+	} else {
+		return nil, errors.New("name not specified for fdname listener")
+	}
+
+	if listenPidStr := os.Getenv("LISTEN_PID"); listenPidStr == "" {
+		return nil, errors.New("cannot create fdname listener because $LISTEN_PID is not set")
+	} else if listenPid, err := strconv.Atoi(listenPidStr); err != nil {
+		return nil, errors.New("cannot create fdname listener because $LISTEN_PID does not contain an integer")
+	} else if ourPid := os.Getpid(); listenPid != ourPid {
+		return nil, fmt.Errorf("cannot create fdname listener because $LISTEN_PID (%d) does not match our PID (%d)", listenPid, ourPid)
+	}
+
+	for i, ithname := range strings.Split(os.Getenv("LISTEN_FDNAMES"), ":") {
+		if ithname == name {
+			file := os.NewFile(uintptr(3+i), name)
+			defer file.Close()
+			return net.FileListener(file)
+		}
+	}
+
+	return nil, fmt.Errorf("fdname: %q not found in $LISTEN_FDNAMES", name)
 }
 
 func openTCPListener(params map[string]interface{}, arg string) (net.Listener, error) {

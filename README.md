@@ -79,6 +79,16 @@ Listen on a file descriptor that is already open, bound, and listening:
 fd:NUMBER
 ```
 
+### Named File Descriptor (compatible with systemd socket activation)
+
+Listen on a named file descriptor that is already open, bound, and listening:
+
+```
+fdname:NAME
+```
+
+`NAME` must match the `FileDescriptorName` option in the systemd socket file.
+
 ### PROXY Protocol
 
 Wrap a listener with the [PROXY Protocol version 2](https://www.haproxy.org/download/1.8/doc/proxy-protocol.txt):
