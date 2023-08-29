@@ -83,7 +83,7 @@ func (wl *watchedListener) watch(path string, info os.FileInfo) {
 func Listen(path string, mode os.FileMode) (net.Listener, error) {
 	tempDir, err := os.MkdirTemp(filepath.Dir(path), ".tmp")
 	if err != nil {
-		return nil, fmt.Errorf("error creating temporary directory to hold Unix socket: %w")
+		return nil, fmt.Errorf("error creating temporary directory to hold Unix socket: %w", err)
 	}
 	defer os.Remove(tempDir)
 

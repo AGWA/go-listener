@@ -64,7 +64,7 @@ func LoadCertificate(filename string) (*tls.Certificate, error) {
 			}
 			cert.PrivateKey, err = parsePrivateKey(block)
 			if err != nil {
-				return nil, fmt.Errorf("contains invalid private key: %w")
+				return nil, fmt.Errorf("contains invalid private key: %w", err)
 			}
 		case "CERTIFICATE":
 			cert.Certificate = append(cert.Certificate, block.Bytes)
@@ -89,7 +89,7 @@ func LoadCertificate(filename string) (*tls.Certificate, error) {
 	}
 	cert.Leaf, err = x509.ParseCertificate(cert.Certificate[0])
 	if err != nil {
-		return nil, fmt.Errorf("contains invalid leaf certificate: %w")
+		return nil, fmt.Errorf("contains invalid leaf certificate: %w", err)
 	}
 
 	return cert, nil
