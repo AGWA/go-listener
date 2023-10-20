@@ -56,6 +56,10 @@ func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 	if serverName[0] == '.' || strings.IndexByte(hello.ServerName, '/') != -1 {
 		return nil, errors.New("Server name is invalid")
 	}
+	var serverNameSuffix string
+	if dot := strings.IndexByte(serverName, '.'); dot != -1 {
+		serverNameSuffix = serverName[dot:]
+	}
 
 	if cert, err := dir.loadCertificate(serverName + ".pem"); err == nil {
 		return cert, nil
@@ -63,23 +67,13 @@ func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 		// TODO: log this
 	}
 
-	serverName = replaceFirstLabel(serverName, "_")
-	if cert, err := dir.loadCertificate(serverName + ".pem"); err == nil {
+	if cert, err := dir.loadCertificate("_" + serverNameSuffix + ".pem"); err == nil {
 		return cert, nil
 	} else if !os.IsNotExist(err) {
 		// TODO: log this
 	}
 
 	return nil, errors.New("No certificate found")
-}
-
-func replaceFirstLabel(hostname string, replacement string) string {
-	dot := strings.IndexByte(hostname, '.')
-	if dot == -1 {
-		return replacement
-	} else {
-		return replacement + hostname[dot:]
-	}
 }
 
 // Return a [GetCertificateFunc] that gets the certificate from a file
