@@ -62,7 +62,7 @@ func LoadCertificate(filename string) (*tls.Certificate, error) {
 			if cert.PrivateKey != nil {
 				return nil, errors.New("contains more than one private key")
 			}
-			cert.PrivateKey, err = parsePrivateKey(block)
+			cert.PrivateKey, err = makePrivateKey(block)
 			if err != nil {
 				return nil, fmt.Errorf("contains invalid private key: %w", err)
 			}
@@ -105,5 +105,31 @@ func parsePrivateKey(block *pem.Block) (crypto.PrivateKey, error) {
 		return x509.ParseECPrivateKey(block.Bytes)
 	default:
 		return nil, errors.New("unrecognized private key type `" + block.Type + "'")
+	}
+}
+
+func makePrivateKey(block *pem.Block) (crypto.PrivateKey, error) {
+	key, err := parsePrivateKey(block)
+	if err != nil {
+		return nil, err
+	}
+	usage := block.Headers["Usage"]
+	switch usage {
+	case "":
+		return key, nil
+	case "decrypt":
+		decrypter, ok := key.(crypto.Decrypter)
+		if !ok {
+			return nil, fmt.Errorf("this key type does not support decryption")
+		}
+		return struct{ crypto.Decrypter }{decrypter}, nil
+	case "sign":
+		signer, ok := key.(crypto.Signer)
+		if !ok {
+			return nil, fmt.Errorf("this key type does not support signing")
+		}
+		return struct{ crypto.Signer }{signer}, nil
+	default:
+		return nil, errors.New("unrecognized usage `" + usage + "'")
 	}
 }
