@@ -60,6 +60,33 @@ func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 	if dot := strings.IndexByte(serverName, '.'); dot != -1 {
 		serverNameSuffix = serverName[dot:]
 	}
+	keyTypes := getSupportedKeyTypes(hello)
+
+	if keyTypes.ecdsa {
+		if cert, err := dir.loadCertificate(serverName + ".pem.ecdsa"); err == nil {
+			return cert, nil
+		} else if !os.IsNotExist(err) {
+			// TODO: log this
+		}
+		if cert, err := dir.loadCertificate("_" + serverNameSuffix + ".pem.ecdsa"); err == nil {
+			return cert, nil
+		} else if !os.IsNotExist(err) {
+			// TODO: log this
+		}
+	}
+
+	if keyTypes.rsa {
+		if cert, err := dir.loadCertificate(serverName + ".pem.rsa"); err == nil {
+			return cert, nil
+		} else if !os.IsNotExist(err) {
+			// TODO: log this
+		}
+		if cert, err := dir.loadCertificate("_" + serverNameSuffix + ".pem.rsa"); err == nil {
+			return cert, nil
+		} else if !os.IsNotExist(err) {
+			// TODO: log this
+		}
+	}
 
 	if cert, err := dir.loadCertificate(serverName + ".pem"); err == nil {
 		return cert, nil
@@ -77,12 +104,25 @@ func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 }
 
 // Return a [GetCertificateFunc] that gets the certificate from a file
-// named SERVER_NAME.pem in the given directory, where SERVER_NAME is
-// the SNI hostname provided by the client.  File are reloaded automatically
-// when they change, allowing zero-downtime certificate rotation.
-// See the documentation of [LoadCertificate] for the required format of the files.
+// in the given directory.  The function searches for files in the
+// following order:
 //
-// If no certificate file exists for SERVER_NAME, or if the client does not
+//  1. SERVER_NAME.pem.ecdsa (only if client supports ECDSA certificates)
+//  2. WILDCARD_NAME.pem.ecdsa (only if client supports ECDSA certificates)
+//  3. SERVER_NAME.pem.rsa (only if client supports RSA certificates)
+//  4. WILDCARD_NAME.pem.rsa (only if client supports RSA certificates)
+//  5. SERVER_NAME.pem
+//  6. WILDCARD_NAME.pem
+//
+// SERVER_NAME is the SNI hostname provided by the client, and WILDCARD_NAME
+// is the SNI hostname with the first label replaced with an underscore
+// (e.g. the wildcard name for www.example.com is _.example.com)
+//
+// Certificate files are cached in memory, and reloaded automatically when they
+// change, allowing zero-downtime certificate rotation.  See the documentation of
+// [LoadCertificate] for the required format of the files.
+//
+// If no certificate file is found, or if the client does not
 // provide an SNI hostname, then the GetCertificateFunc returns an error,
 // causing the TLS connection to be terminated.  If you need to support clients
 // that don't provide SNI, wrap the GetCertificateFunc with
