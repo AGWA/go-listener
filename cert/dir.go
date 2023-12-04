@@ -52,10 +52,10 @@ func (dir *directory) loadCertificate(filename string) (*tls.Certificate, error)
 func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
 	serverName := hello.ServerName
 	if serverName == "" {
-		return nil, errors.New("Client does not support SNI")
+		return nil, errors.New("go-listener: client does not support SNI")
 	}
 	if serverName[0] == '.' || strings.IndexByte(hello.ServerName, '/') != -1 {
-		return nil, errors.New("Server name is invalid")
+		return nil, errors.New("go-listener: client sent an invalid server name")
 	}
 	var serverNameSuffix string
 	if dot := strings.IndexByte(serverName, '.'); dot != -1 {
@@ -101,7 +101,7 @@ func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 		// TODO: log this
 	}
 
-	return nil, fmt.Errorf("No certificate found for %q", serverName)
+	return nil, fmt.Errorf("go-listener: no certificate found for %q", serverName)
 }
 
 // Return a [GetCertificateFunc] that gets the certificate from a file
