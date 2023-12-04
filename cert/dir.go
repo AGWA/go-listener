@@ -28,6 +28,7 @@ package cert
 import (
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -100,7 +101,7 @@ func (dir *directory) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certifica
 		// TODO: log this
 	}
 
-	return nil, errors.New("No certificate found")
+	return nil, fmt.Errorf("No certificate found for %q", serverName)
 }
 
 // Return a [GetCertificateFunc] that gets the certificate from a file
