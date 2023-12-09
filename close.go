@@ -29,7 +29,7 @@ import (
 	"net"
 )
 
-// Close every listener in listeners
+// CloseAll invokes Close on every listener. Errors are ignored.
 func CloseAll(listeners []net.Listener) {
 	for _, listener := range listeners {
 		listener.Close()
