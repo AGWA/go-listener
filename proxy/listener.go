@@ -27,6 +27,7 @@
 package proxy // import "src.agwa.name/go-listener/proxy"
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -82,14 +83,15 @@ func (listener *proxyListener) Addr() net.Addr {
 func (listener *proxyListener) handleAccepts() {
 	for {
 		conn, err := listener.inner.Accept()
-		if err != nil {
-			if listener.sendError(err) {
-				continue
-			} else {
+		if errors.Is(err, net.ErrClosed) {
+			break
+		} else if err != nil {
+			if !listener.sendError(err) {
 				break
 			}
+		} else {
+			go listener.handleConnection(conn)
 		}
-		go listener.handleConnection(conn)
 	}
 }
 
