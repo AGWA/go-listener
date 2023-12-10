@@ -27,7 +27,6 @@
 package proxy // import "src.agwa.name/go-listener/proxy"
 
 import (
-	"errors"
 	"fmt"
 	"net"
 	"time"
@@ -62,7 +61,7 @@ func (listener *proxyListener) Accept() (net.Conn, error) {
 	case err := <-listener.errors:
 		return nil, err
 	case <-listener.done:
-		return nil, errors.New("Listener is closed")
+		return nil, net.ErrClosed
 	}
 }
 
