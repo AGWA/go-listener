@@ -66,8 +66,13 @@ func (listener *proxyListener) Accept() (net.Conn, error) {
 }
 
 func (listener *proxyListener) Close() error {
-	close(listener.done)
-	return listener.inner.Close()
+	select {
+	case <-listener.done:
+		return net.ErrClosed
+	default:
+		close(listener.done)
+		return listener.inner.Close()
+	}
 }
 
 func (listener *proxyListener) Addr() net.Addr {
