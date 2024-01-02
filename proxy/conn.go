@@ -42,3 +42,7 @@ func (conn *proxyConn) LocalAddr() net.Addr {
 func (conn *proxyConn) RemoteAddr() net.Addr {
 	return conn.remoteAddr
 }
+
+func (conn *proxyConn) NetConn() net.Conn {
+	return conn.Conn
+}
