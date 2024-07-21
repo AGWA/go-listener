@@ -28,6 +28,7 @@ package listener // import "src.agwa.name/go-listener"
 import (
 	"errors"
 	"net"
+	"sync"
 )
 
 type multiAddr struct{}
@@ -40,6 +41,7 @@ type multiListener struct {
 	closed    chan struct{}
 	conns     chan net.Conn
 	errors    chan error
+	closeMu   sync.Mutex
 }
 
 // Create a net.Listener that aggregates the provided listeners. Calling Accept() returns
@@ -108,6 +110,9 @@ func (ml *multiListener) Accept() (net.Conn, error) {
 }
 
 func (ml *multiListener) Close() error {
+	ml.closeMu.Lock()
+	defer ml.closeMu.Unlock()
+
 	select {
 	case <-ml.closed:
 		return net.ErrClosed

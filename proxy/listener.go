@@ -30,14 +30,16 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"sync"
 	"time"
 )
 
 type proxyListener struct {
-	inner  net.Listener
-	conns  chan net.Conn
-	errors chan error
-	done   chan struct{}
+	inner   net.Listener
+	conns   chan net.Conn
+	errors  chan error
+	done    chan struct{}
+	closeMu sync.Mutex
 }
 
 // NewListener creates a [net.Listener] which accepts connections from an
@@ -67,6 +69,9 @@ func (listener *proxyListener) Accept() (net.Conn, error) {
 }
 
 func (listener *proxyListener) Close() error {
+	listener.closeMu.Lock()
+	defer listener.closeMu.Unlock()
+
 	select {
 	case <-listener.done:
 		return net.ErrClosed
