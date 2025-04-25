@@ -49,7 +49,7 @@ func PeekClientHello(reader io.Reader) (*tls.ClientHelloInfo, io.Reader, error) 
 	peekedBytes := new(bytes.Buffer)
 	hello, err := ReadClientHello(io.TeeReader(reader, peekedBytes))
 	if err != nil {
-		return nil, nil, err
+		return nil, io.MultiReader(peekedBytes, reader), err
 	}
 	return hello, io.MultiReader(peekedBytes, reader), nil
 }
