@@ -33,7 +33,7 @@ import (
 	"encoding/pem"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 // A function that returns a [tls.Certificate] based on the given [tls.ClientHelloInfo]
@@ -46,7 +46,7 @@ type GetCertificateFunc func(*tls.ClientHelloInfo) (*tls.Certificate, error)
 //   - Up to one OCSP RESPONSE, containing a stapled OCSP response.
 //   - Any number of SIGNED CERTIFICATE TIMESTAMP, containing stapled SCTs.
 func LoadCertificate(filename string) (*tls.Certificate, error) {
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
