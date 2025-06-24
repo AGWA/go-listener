@@ -23,6 +23,7 @@
 // sale, use or other dealings in this Software without prior written
 // authorization.
 
+// Package listener provides functions for creating net.Listeners
 package listener // import "src.agwa.name/go-listener"
 
 import (
