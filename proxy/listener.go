@@ -110,7 +110,7 @@ func (listener *proxyListener) handleConnection(conn net.Conn) {
 	header, err := ReadHeader(conn)
 	if err != nil {
 		conn.Close()
-		err = fmt.Errorf("Reading proxy header: %w", err)
+		err = fmt.Errorf("reading proxy header: %w", err)
 		listener.sendError(&acceptError{error: err, temporary: true})
 		return
 	}

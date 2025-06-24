@@ -72,7 +72,7 @@ func OpenAll(specs []string) ([]net.Listener, error) {
 func OpenJSON(spec map[string]interface{}) (net.Listener, error) {
 	listenerType, ok := spec["type"].(string)
 	if !ok {
-		return nil, errors.New("Listener object does not contain a string type field")
+		return nil, errors.New("listener object does not contain a string type field")
 	}
 	return openType(listenerType, spec, "")
 }

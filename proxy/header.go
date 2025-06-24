@@ -73,10 +73,10 @@ func ReadHeader(conn net.Conn) (*Header, error) {
 	)
 
 	if !bytes.Equal(signature[:], protocolSignature[:]) {
-		return nil, errors.New("Not a proxied connection")
+		return nil, errors.New("not a proxied connection")
 	}
 	if version != protocolVersion {
-		return nil, errors.New("Unsupported proxy protocol version")
+		return nil, errors.New("unsupported proxy protocol version")
 	}
 
 	payload := make([]byte, length)
@@ -90,7 +90,7 @@ func ReadHeader(conn net.Conn) (*Header, error) {
 	case commandProxy:
 		return parseProxyHeader(family, payload)
 	default:
-		return nil, fmt.Errorf("Unsupported proxy command %x", command)
+		return nil, fmt.Errorf("unsupported proxy command %x", command)
 	}
 }
 
@@ -98,7 +98,7 @@ func parseProxyHeader(family uint8, payload []byte) (*Header, error) {
 	switch family {
 	case familyTCP4:
 		if len(payload) < 12 {
-			return nil, errors.New("Header too short for TCP over IPv4")
+			return nil, errors.New("header too short for TCP over IPv4")
 		}
 		return &Header{
 			RemoteAddr: &net.TCPAddr{
@@ -112,7 +112,7 @@ func parseProxyHeader(family uint8, payload []byte) (*Header, error) {
 		}, nil
 	case familyUDP4:
 		if len(payload) < 12 {
-			return nil, errors.New("Header too short for UDP over IPv4")
+			return nil, errors.New("header too short for UDP over IPv4")
 		}
 		return &Header{
 			RemoteAddr: &net.UDPAddr{
@@ -126,7 +126,7 @@ func parseProxyHeader(family uint8, payload []byte) (*Header, error) {
 		}, nil
 	case familyTCP6:
 		if len(payload) < 36 {
-			return nil, errors.New("Header too short for TCP over IPv6")
+			return nil, errors.New("header too short for TCP over IPv6")
 		}
 		return &Header{
 			RemoteAddr: &net.TCPAddr{
@@ -140,7 +140,7 @@ func parseProxyHeader(family uint8, payload []byte) (*Header, error) {
 		}, nil
 	case familyUDP6:
 		if len(payload) < 36 {
-			return nil, errors.New("Header too short for UDP over IPv6")
+			return nil, errors.New("header too short for UDP over IPv6")
 		}
 		return &Header{
 			RemoteAddr: &net.UDPAddr{
@@ -153,7 +153,7 @@ func parseProxyHeader(family uint8, payload []byte) (*Header, error) {
 			},
 		}, nil
 	default:
-		return nil, fmt.Errorf("Unsupported address family %x", family)
+		return nil, fmt.Errorf("unsupported address family %x", family)
 	}
 }
 
