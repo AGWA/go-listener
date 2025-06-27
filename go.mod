@@ -1,6 +1,6 @@
 module src.agwa.name/go-listener
 
-go 1.19
+go 1.23.0
 
 require golang.org/x/crypto v0.12.0
 
